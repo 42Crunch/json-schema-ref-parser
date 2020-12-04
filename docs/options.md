@@ -10,6 +10,7 @@ Example
 
 ```javascript
 $RefParser.dereference("my-schema.yaml", {
+  continueOnError: true,            // Don't throw on the first error
   parse: {
     json: false,                    // Disable the JSON parser
     yaml: {

@@ -1,11 +1,15 @@
 "use strict";
 
-const { expect } = require("chai");
+const chai = require("chai");
+const chaiSubset = require("chai-subset");
+chai.use(chaiSubset);
+const { expect } = chai;
 const $RefParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
 const parsedSchema = require("./parsed");
 const dereferencedSchema = require("./dereferenced");
+const { JSONParserErrorGroup, ParserError, UnmatchedParserError } = require("../../../lib/util/errors");
 
 describe("References to non-JSON files", () => {
   it("should parse successfully", async () => {
@@ -64,13 +68,55 @@ describe("References to non-JSON files", () => {
     expect(schema).to.deep.equal(dereferencedSchema.binaryParser);
   });
 
+  it("should throw an error if no parser can be matched", async () => {
+    try {
+      await $RefParser.dereference(path.rel("specs/parsers/parsers.yaml"), {
+        parse: {
+          yaml: false,
+          json: false,
+          text: false,
+          binary: false,
+        },
+      });
+      helper.shouldNotGetCalled();
+    }
+    catch (err) {
+      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err.message).to.contain("Unable to parse ");
+      expect(err.message).to.contain("parsers/parsers.yaml");
+    }
+  });
+
+  it("should throw an error if no parser returned a result", async () => {
+    try {
+      await $RefParser.dereference(path.rel("specs/parsers/parsers.yaml"), {
+        parse: {
+          yaml: {
+            canParse: true,
+            parse () {
+            }
+          },
+          json: false,
+          text: false,
+          binary: false,
+        },
+      });
+      helper.shouldNotGetCalled();
+    }
+    catch (err) {
+      // would time out otherwise
+      expect(err).to.be.an.instanceOf(ParserError);
+      expect(err.message).to.contain("No promise has been returned or callback has been called.");
+    }
+  });
+
   it('should throw an error if "parse.text" and "parse.binary" are disabled', async () => {
     try {
       await $RefParser.dereference(path.rel("specs/parsers/parsers.yaml"), { parse: { text: false, binary: false }});
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ParserError);
       expect(err.message).to.contain("Error parsing ");
     }
   });
@@ -161,4 +207,54 @@ describe("References to non-JSON files", () => {
     expect(schema).to.deep.equal(dereferencedSchema.defaultParsers);
   });
 
+  it("should normalize errors thrown by parsers", async () => {
+    try {
+      await $RefParser.dereference(path.rel("specs/parsers/parsers.yaml"), {
+        parse: {
+          // A custom parser that always fails,
+          // so the built-in parsers will be used as a fallback
+          yaml: {
+            order: 1,
+            parse () {
+              throw new Error("Woops");
+            }
+          }
+        }
+      });
+      helper.shouldNotGetCalled();
+    }
+    catch (err) {
+      expect(err).to.be.instanceof(ParserError);
+      expect(err.message).to.contain("Error parsing");
+      expect(err.message).to.contain("arsers/parsers.yaml: Woops");
+    }
+  });
+
+  it("should throw a grouped error if no parser can be matched and continueOnError is true", async () => {
+    try {
+      const parser = new $RefParser();
+      await parser.dereference(path.rel("specs/parsers/parsers.yaml"), {
+        parse: {
+          yaml: false,
+          json: false,
+          text: false,
+          binary: false,
+        },
+        continueOnError: true,
+      });
+      helper.shouldNotGetCalled();
+    }
+    catch (err) {
+      expect(err).to.be.instanceof(JSONParserErrorGroup);
+      expect(err.errors.length).to.equal(1);
+      expect(err.errors).to.containSubset([
+        {
+          name: UnmatchedParserError.name,
+          message: message => message.startsWith("Could not find parser for"),
+          path: [],
+          source: message => message.endsWith("specs/parsers/parsers.yaml") || message.startsWith("http://localhost"),
+        },
+      ]);
+    }
+  });
 });

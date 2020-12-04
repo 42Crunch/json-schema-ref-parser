@@ -4,6 +4,7 @@ const { expect } = require("chai");
 const $RefParser = require("../../lib");
 const helper = require("../utils/helper");
 const path = require("../utils/path");
+const { ParserError } = require("../../lib/util/errors");
 
 describe("Callback & Promise syntax", () => {
   for (let method of ["parse", "resolve", "dereference", "bundle"]) {
@@ -20,8 +21,8 @@ describe("Callback & Promise syntax", () => {
       let parser = new $RefParser();
       parser[method](path.rel("specs/internal/internal.yaml"), (err, result) => {
         try {
-          expect(err).to.be.null;
-          expect(result).to.be.an("object").and.ok;
+          expect(err).to.equal(null);
+          expect(result).to.be.an("object");
 
           if (method === "resolve") {
             expect(result).to.equal(parser.$refs);
@@ -42,8 +43,8 @@ describe("Callback & Promise syntax", () => {
     return function (done) {
       $RefParser[method](path.rel("specs/invalid/invalid.yaml"), (err, result) => {
         try {
-          expect(err).to.be.an.instanceOf(SyntaxError);
-          expect(result).to.be.undefined;
+          expect(err).to.be.an.instanceOf(ParserError);
+          expect(result).to.equal(undefined);
           done();
         }
         catch (e) {
@@ -58,7 +59,7 @@ describe("Callback & Promise syntax", () => {
       let parser = new $RefParser();
       return parser[method](path.rel("specs/internal/internal.yaml"))
         .then((result) => {
-          expect(result).to.be.an("object").and.ok;
+          expect(result).to.be.an("object");
 
           if (method === "resolve") {
             expect(result).to.equal(parser.$refs);
@@ -75,7 +76,7 @@ describe("Callback & Promise syntax", () => {
       return $RefParser[method](path.rel("specs/invalid/invalid.yaml"))
         .then(helper.shouldNotGetCalled)
         .catch((err) => {
-          expect(err).to.be.an.instanceOf(SyntaxError);
+          expect(err).to.be.an.instanceOf(ParserError);
         });
     };
   }
