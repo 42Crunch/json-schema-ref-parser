@@ -96,6 +96,7 @@ declare class $RefParser {
   public static bundle(schema: string | $RefParser.JSONSchema): Promise<$RefParser.JSONSchema>;
   public static bundle(schema: string | $RefParser.JSONSchema, options: $RefParser.Options): Promise<$RefParser.JSONSchema>;
   public static bundle(baseUrl: string, schema: string | $RefParser.JSONSchema, options: $RefParser.Options): Promise<$RefParser.JSONSchema>;
+  public static bundle(schema: any, options: any): Promise<$RefParser.JSONSchema>;
 
   /**
    * *This method is used internally by other methods, such as `bundle` and `dereference`. You probably won't need to call this method yourself.*
