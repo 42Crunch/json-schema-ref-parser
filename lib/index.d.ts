@@ -78,7 +78,7 @@ declare class $RefParser {
   public bundle(schema: string | $RefParser.JSONSchema): Promise<$RefParser.JSONSchema>;
   public bundle(schema: string | $RefParser.JSONSchema, options: $RefParser.Options): Promise<$RefParser.JSONSchema>;
   public bundle(baseUrl: string, schema: string | $RefParser.JSONSchema, options: $RefParser.Options): Promise<$RefParser.JSONSchema>;
-
+  public static bundle(schema: any, options: any): Promise<$RefParser.JSONSchema>;
   /**
    * Bundles all referenced files/URLs into a single schema that only has internal `$ref` pointers. This lets you split-up your schema however you want while you're building it, but easily combine all those files together when it's time to package or distribute the schema to other people. The resulting schema size will be small, since it will still contain internal JSON references rather than being fully-dereferenced.
    *
