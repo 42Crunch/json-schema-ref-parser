@@ -1,2 +1,2 @@
 "use strict";
-module.exports = require("@apidevtools/json-schema-ref-parser");
+module.exports = require("@xliic/json-schema-ref-parser");
