@@ -1,14 +1,12 @@
-"use strict";
-
-const { expect } = require("chai");
-const { resolve } = require("path");
-const $RefParser = require("../../..");
-const path = require("../../utils/path");
-const helper = require("../../utils/helper");
-const url = require("../../../lib/util/url");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const bundledSchema = require("./bundled");
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { resolve } from "path";
+import $RefParser from "../../..";
+import path from "../../utils/path";
+import helper from "../../utils/helper";
+import url from "../../../lib/util/url";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import bundledSchema from "./bundled";
 
 describe("When executed in the context of root directory", () => {
   // Store the OS root directory
@@ -38,11 +36,13 @@ describe("When executed in the context of root directory", () => {
     }
   }
 
-  beforeEach("Mock process.cwd and url.cwd", () => {
+  // Mock process.cwd and url.cwd
+  beforeEach(() => {
     url.cwd = mockUrlCwd;
   });
 
-  afterEach("Restore process.cwd and url.cwd", () => {
+  // Restore process.cwd and url.cwd
+  afterEach(() => {
     url.cwd = originalUrlCwd;
     process.cwd = originalProcessCwd; // already restored by the finally block above, but just in case
   });
@@ -51,9 +51,9 @@ describe("When executed in the context of root directory", () => {
   it("should parse successfully from an absolute path", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.abs("specs/absolute-root/absolute-root.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([
       path.abs("specs/absolute-root/absolute-root.yaml")
     ]);
   });
@@ -61,9 +61,9 @@ describe("When executed in the context of root directory", () => {
   it("should parse successfully from a url", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.url("specs/absolute-root/absolute-root.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([path.url("specs/absolute-root/absolute-root.yaml")]);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([path.url("specs/absolute-root/absolute-root.yaml")]);
   });
 
   it("should resolve successfully from an absolute path", helper.testResolve(
@@ -85,23 +85,22 @@ describe("When executed in the context of root directory", () => {
   it("should dereference successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.dereference(path.abs("specs/absolute-root/absolute-root.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(dereferencedSchema);
     // Reference equality
-    expect(schema.properties.name).to.equal(schema.definitions.name);
-    expect(schema.definitions["required string"])
-      .to.equal(schema.definitions.name.properties.first)
-      .to.equal(schema.definitions.name.properties.last)
-      .to.equal(schema.properties.name.properties.first)
-      .to.equal(schema.properties.name.properties.last);
+    expect(schema.properties.name).toBe(schema.definitions.name);
+    expect(schema.definitions["required string"]).toBe(schema.definitions.name.properties.first);
+    expect(schema.definitions["required string"]).toBe(schema.definitions.name.properties.last);
+    expect(schema.definitions["required string"]).toBe(schema.properties.name.properties.first);
+    expect(schema.definitions["required string"]).toBe(schema.properties.name.properties.last);
     // The "circular" flag should NOT be set
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 
   it("should bundle successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.bundle(path.abs("specs/absolute-root/absolute-root.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(bundledSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(bundledSchema);
   });
 });

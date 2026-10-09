@@ -1,13 +1,8 @@
-"use strict";
-
-const chai = require("chai");
-const chaiSubset = require("chai-subset");
-chai.use(chaiSubset);
-const { expect } = chai;
-const $RefParser = require("../../../lib");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const { JSONParserErrorGroup, InvalidPointerError } = require("../../../lib/util/errors");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../../lib";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import { JSONParserErrorGroup, InvalidPointerError } from "../../../lib/util/errors";
 
 describe("Schema with invalid pointers", () => {
   it("should throw an error for an invalid pointer", async () => {
@@ -16,8 +11,8 @@ describe("Schema with invalid pointers", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.an.instanceOf(InvalidPointerError);
-      expect(err.message).to.contain("Invalid $ref pointer \"f\". Pointers must begin with \"#/\"");
+      expect(err).toBeInstanceOf(InvalidPointerError);
+      expect(err.message).toContain("Invalid $ref pointer \"f\". Pointers must begin with \"#/\"");
     }
   });
 
@@ -28,17 +23,17 @@ describe("Schema with invalid pointers", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.instanceof(JSONParserErrorGroup);
-      expect(err.files).to.equal(parser);
-      expect(err.message).to.equal(`1 error occurred while reading '${path.abs("specs/invalid-pointers/invalid.json")}'`);
-      expect(err.errors).to.containSubset([
-        {
+      expect(err).toBeInstanceOf(JSONParserErrorGroup);
+      expect(err.files).toBe(parser);
+      expect(err.message).toBe(`1 error occurred while reading '${path.abs("specs/invalid-pointers/invalid.json")}'`);
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: InvalidPointerError.name,
           message: "Invalid $ref pointer \"f\". Pointers must begin with \"#/\"",
           path: ["foo"],
           source: path.unixify(path.abs("specs/invalid-pointers/invalid.json")),
-        }
-      ]);
+        })
+      ]));
     }
   });
 });

@@ -1,21 +1,16 @@
-"use strict";
-
-const chai = require("chai");
-const chaiSubset = require("chai-subset");
-chai.use(chaiSubset);
-const { expect } = chai;
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const { JSONParserErrorGroup, ParserError, UnmatchedParserError } = require("../../../lib/util/errors");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import { JSONParserErrorGroup, ParserError, UnmatchedParserError } from "../../../lib/util/errors";
 
 describe("References to non-JSON files", () => {
   it("should parse successfully", async () => {
     const schema = await $RefParser
       .parse(path.rel("specs/parsers/parsers.yaml"));
-    expect(schema).to.deep.equal(parsedSchema.schema);
+    expect(schema).toEqual(parsedSchema.schema);
   });
 
   it("should resolve successfully", helper.testResolve(
@@ -32,18 +27,18 @@ describe("References to non-JSON files", () => {
   it("should dereference successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.dereference(path.rel("specs/parsers/parsers.yaml"));
-    expect(schema).to.equal(parser.schema);
+    expect(schema).toBe(parser.schema);
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.defaultParsers);
+    expect(schema).toEqual(dereferencedSchema.defaultParsers);
     // The "circular" flag should NOT be set
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 
   it("should bundle successfully", async () => {
     const schema = await $RefParser
       .bundle(path.rel("specs/parsers/parsers.yaml"));
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.defaultParsers);
+    expect(schema).toEqual(dereferencedSchema.defaultParsers);
   });
 
   it('should parse text as binary if "parse.text" is disabled', async () => {
@@ -65,7 +60,7 @@ describe("References to non-JSON files", () => {
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
     schema.definitions.unknown = helper.convertNodeBuffersToPOJOs(schema.definitions.unknown);
     schema.definitions.empty = helper.convertNodeBuffersToPOJOs(schema.definitions.empty);
-    expect(schema).to.deep.equal(dereferencedSchema.binaryParser);
+    expect(schema).toEqual(dereferencedSchema.binaryParser);
   });
 
   it("should throw an error if no parser can be matched", async () => {
@@ -81,9 +76,9 @@ describe("References to non-JSON files", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain("Unable to parse ");
-      expect(err.message).to.contain("parsers/parsers.yaml");
+      expect(err).toBeInstanceOf(SyntaxError);
+      expect(err.message).toContain("Unable to parse ");
+      expect(err.message).toContain("parsers/parsers.yaml");
     }
   });
 
@@ -105,8 +100,8 @@ describe("References to non-JSON files", () => {
     }
     catch (err) {
       // would time out otherwise
-      expect(err).to.be.an.instanceOf(ParserError);
-      expect(err.message).to.contain("No promise has been returned or callback has been called.");
+      expect(err).toBeInstanceOf(ParserError);
+      expect(err.message).toContain("No promise has been returned or callback has been called.");
     }
   });
 
@@ -116,8 +111,8 @@ describe("References to non-JSON files", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.an.instanceOf(ParserError);
-      expect(err.message).to.contain("Error parsing ");
+      expect(err).toBeInstanceOf(ParserError);
+      expect(err.message).toContain("Error parsing ");
     }
   });
 
@@ -132,7 +127,7 @@ describe("References to non-JSON files", () => {
         }
       }
     });
-    expect(schema).to.deep.equal(dereferencedSchema.staticParser);
+    expect(schema).toEqual(dereferencedSchema.staticParser);
   });
 
   it("should use a custom parser that returns a value", async () => {
@@ -150,7 +145,7 @@ describe("References to non-JSON files", () => {
       }
     });
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.customParser);
+    expect(schema).toEqual(dereferencedSchema.customParser);
   });
 
   it("should use a custom parser that calls a callback", async () => {
@@ -167,7 +162,7 @@ describe("References to non-JSON files", () => {
       }
     });
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.customParser);
+    expect(schema).toEqual(dereferencedSchema.customParser);
   });
 
   it("should use a custom parser that returns a promise", async () => {
@@ -186,7 +181,7 @@ describe("References to non-JSON files", () => {
       }
     });
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.customParser);
+    expect(schema).toEqual(dereferencedSchema.customParser);
   });
 
   it("should continue parsing if a custom parser fails", async () => {
@@ -204,7 +199,7 @@ describe("References to non-JSON files", () => {
       }
     });
     schema.definitions.binary = helper.convertNodeBuffersToPOJOs(schema.definitions.binary);
-    expect(schema).to.deep.equal(dereferencedSchema.defaultParsers);
+    expect(schema).toEqual(dereferencedSchema.defaultParsers);
   });
 
   it("should normalize errors thrown by parsers", async () => {
@@ -224,9 +219,9 @@ describe("References to non-JSON files", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.instanceof(ParserError);
-      expect(err.message).to.contain("Error parsing");
-      expect(err.message).to.contain("arsers/parsers.yaml: Woops");
+      expect(err).toBeInstanceOf(ParserError);
+      expect(err.message).toContain("Error parsing");
+      expect(err.message).toContain("arsers/parsers.yaml: Woops");
     }
   });
 
@@ -245,16 +240,16 @@ describe("References to non-JSON files", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.instanceof(JSONParserErrorGroup);
-      expect(err.errors.length).to.equal(1);
-      expect(err.errors).to.containSubset([
-        {
+      expect(err).toBeInstanceOf(JSONParserErrorGroup);
+      expect(err.errors.length).toBe(1);
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: UnmatchedParserError.name,
-          message: message => message.startsWith("Could not find parser for"),
+          message: expect.toSatisfy(message => message.startsWith("Could not find parser for")),
           path: [],
-          source: message => message.endsWith("specs/parsers/parsers.yaml") || message.startsWith("http://localhost"),
-        },
-      ]);
+          source: expect.toSatisfy(message => message.endsWith("specs/parsers/parsers.yaml") || message.startsWith("http://localhost")),
+        }),
+      ]));
     }
   });
 });

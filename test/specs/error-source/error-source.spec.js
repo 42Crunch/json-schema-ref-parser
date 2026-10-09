@@ -1,14 +1,9 @@
-"use strict";
+import { describe, it, expect } from "vitest";
 
-const chai = require("chai");
-const chaiSubset = require("chai-subset");
-chai.use(chaiSubset);
-
-const { expect } = chai;
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const { InvalidPointerError, ResolverError, MissingPointerError } = require("../../../lib/util/errors");
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import { InvalidPointerError, ResolverError, MissingPointerError } from "../../../lib/util/errors";
 
 
 describe("Report correct error source and path for", () => {
@@ -19,14 +14,14 @@ describe("Report correct error source and path for", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err.errors).to.containSubset([
-        {
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: ResolverError.name,
-          source: source => typeof source === "string",
+          source: expect.toSatisfy(source => typeof source === "string"),
           path: ["foo", "bar"],
-          message: message => typeof message === "string",
-        },
-      ]);
+          message: expect.toSatisfy(message => typeof message === "string"),
+        }),
+      ]));
     }
   });
 
@@ -37,14 +32,14 @@ describe("Report correct error source and path for", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err.errors).to.containSubset([
-        {
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: ResolverError.name,
           source: path.unixify(path.abs("specs/error-source/broken-external.json")),
           path: ["components", "schemas", "testSchema", "properties", "test"],
-          message: message => typeof message === "string",
-        },
-      ]);
+          message: expect.toSatisfy(message => typeof message === "string"),
+        }),
+      ]));
     }
   });
 
@@ -55,20 +50,20 @@ describe("Report correct error source and path for", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err.errors).to.containSubset([
-        {
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: MissingPointerError.name,
           source: path.unixify(path.abs("specs/error-source/invalid-external.json")),
           path: ["foo", "bar"],
-          message: message => typeof message === "string",
-        },
-        {
+          message: expect.toSatisfy(message => typeof message === "string"),
+        }),
+        expect.objectContaining({
           name: ResolverError.name,
           source: path.unixify(path.abs("specs/error-source/broken-external.json")),
           path: ["components", "schemas", "testSchema", "properties", "test"],
-          message: message => typeof message === "string",
-        },
-      ]);
+          message: expect.toSatisfy(message => typeof message === "string"),
+        }),
+      ]));
     }
   });
 
@@ -79,14 +74,14 @@ describe("Report correct error source and path for", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err.errors).to.containSubset([
-        {
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: InvalidPointerError.name,
           source: path.unixify(path.abs("specs/error-source/invalid-pointer.json")),
           path: ["foo", "baz"],
-          message: message => typeof message === "string",
-        },
-      ]);
+          message: expect.toSatisfy(message => typeof message === "string"),
+        }),
+      ]));
     }
   });
 });

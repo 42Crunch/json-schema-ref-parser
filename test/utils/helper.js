@@ -1,10 +1,8 @@
-"use strict";
+import { expect } from "vitest";
+import $RefParser from "../../lib";
+import { host } from "@jsdevtools/host-environment";
 
-const $RefParser = require("../../lib");
-const { host } = require("@jsdevtools/host-environment");
-const { expect } = require("chai");
-
-const helper = module.exports = {
+const helper = {
   /**
    * Throws an error if called.
    */
@@ -33,19 +31,19 @@ const helper = module.exports = {
       let parser = new $RefParser();
       let $refs = await parser.resolve(filePath);
 
-      expect(parser.schema).to.deep.equal(parsedSchema);
-      expect(parser.$refs).to.equal($refs);
+      expect(parser.schema).toEqual(parsedSchema);
+      expect(parser.$refs).toBe($refs);
 
       // Resolved file paths
       try {
-        expect((actualFiles = $refs.paths())).to.have.same.members(expectedFiles);
+        expect((actualFiles = $refs.paths()).sort()).toEqual([...expectedFiles].sort());
         if (host.node) {
-          expect((actualFiles = $refs.paths(["file"]))).to.have.same.members(expectedFiles);
-          expect($refs.paths("http")).to.be.an("array").with.lengthOf(0);
+          expect((actualFiles = $refs.paths(["file"])).sort()).toEqual([...expectedFiles].sort());
+          expect($refs.paths("http")).toEqual([]);
         }
         else {
-          expect((actualFiles = $refs.paths(["http"]))).to.have.same.members(expectedFiles);
-          expect($refs.paths("file")).to.be.an("array").with.lengthOf(0);
+          expect((actualFiles = $refs.paths(["http"])).sort()).toEqual([...expectedFiles].sort());
+          expect($refs.paths("file")).toEqual([]);
         }
       }
       catch (e) {
@@ -56,11 +54,11 @@ const helper = module.exports = {
 
       // Resolved values
       let values = $refs.values();
-      expect(values).to.have.keys(expectedFiles);
+      expect(Object.keys(values).sort()).toEqual([...expectedFiles].sort());
       for (let [i, file] of expectedFiles.entries()) {
         let actual = helper.convertNodeBuffersToPOJOs(values[file]);
         let expected = messages[i];
-        expect(actual).to.deep.equal(expected, file);
+        expect(actual, file).toEqual(expected);
       }
     };
   },
@@ -96,3 +94,5 @@ const helper = module.exports = {
     return clone;
   },
 };
+
+export default helper;

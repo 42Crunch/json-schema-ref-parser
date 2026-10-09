@@ -1,8 +1,6 @@
-"use strict";
-
-const { host } = require("@jsdevtools/host-environment");
-const { expect } = require("chai");
-const $RefParser = require("../../lib");
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { host } from "@jsdevtools/host-environment";
+import $RefParser from "../../lib";
 
 describe("HTTP options", () => {
   let windowOnError, testDone;
@@ -30,7 +28,7 @@ describe("HTTP options", () => {
         }}}
       });
 
-      expect(schema.headers).to.have.property("Accept", "application/json");
+      expect(schema.headers).toHaveProperty("Accept", "application/json");
     });
 
     // Old versions of IE don't allow setting custom headers
@@ -44,31 +42,25 @@ describe("HTTP options", () => {
           }}}
         });
 
-        expect(schema.headers).to.have.property("My-Custom-Header", "hello, world");
+        expect(schema.headers).toHaveProperty("My-Custom-Header", "hello, world");
       });
     }
   });
 
   // 2020-07-08 - The HTTPBin redirect endpoints are suddenly returning 404 errors. Not sure why 🤷‍♂️
   // TODO: Re-enable these tests once HTTPBin is working again
-  describe.skip("http.redirect", () => {
+  describe.skip("http.redirect", { timeout: 30000 }, () => {
     if (host.browser.safari && host.karma && host.karma.ci) {
       // These tests fail in Safari when running on Sauce Labs (they pass when running on Safari locally).
       // It gets an XHR error when trying to reach httpbin.org.
       return;
     }
 
-    beforeEach(function () {
-      // Increase the timeout for these tests, to allow for multiple redirects
-      this.currentTest.timeout(30000);
-      this.currentTest.slow(3000);
-    });
-
     it("should follow 5 redirects by default", async () => {
       let parser = new $RefParser();
 
       let schema = await parser.parse("https://httpbin.org/redirect/5");
-      expect(schema.url).to.equal("https://httpbin.org/get");
+      expect(schema.url).toBe("https://httpbin.org/get");
     });
 
     it("should not follow 6 redirects by default", async () => {
@@ -82,23 +74,21 @@ describe("HTTP options", () => {
         else {
           // Some web browsers will automatically follow redirects.
           // Nothing we can do about that.
-          expect(schema.url).to.equal("https://httpbin.org/get");
+          expect(schema.url).toBe("https://httpbin.org/get");
         }
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.contain("Error downloading https://httpbin.org/redirect/6");
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toContain("Error downloading https://httpbin.org/redirect/6");
         if (host.node) {
-          expect(err.message).to.equal(
-            "Error downloading https://httpbin.org/redirect/6. \n" +
+          expect(err.message).toBe("Error downloading https://httpbin.org/redirect/6. \n" +
             "Too many redirects: \n" +
             "  https://httpbin.org/redirect/6 \n" +
             "  https://httpbin.org/relative-redirect/5 \n" +
             "  https://httpbin.org/relative-redirect/4 \n" +
             "  https://httpbin.org/relative-redirect/3 \n" +
             "  https://httpbin.org/relative-redirect/2 \n" +
-            "  https://httpbin.org/relative-redirect/1"
-          );
+            "  https://httpbin.org/relative-redirect/1");
         }
       }
     });
@@ -110,7 +100,7 @@ describe("HTTP options", () => {
         resolve: { http: { redirects: 10 }}
       });
 
-      expect(schema.url).to.equal("https://httpbin.org/get");
+      expect(schema.url).toBe("https://httpbin.org/get");
     });
 
     it("should not follow any redirects if http.redirects = 0", async () => {
@@ -126,18 +116,16 @@ describe("HTTP options", () => {
         else {
         // Some web browsers will automatically follow redirects.
         // Nothing we can do about that.
-          expect(schema.url).to.equal("https://httpbin.org/get");
+          expect(schema.url).toBe("https://httpbin.org/get");
         }
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.contain("Error downloading https://httpbin.org/redirect/1");
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toContain("Error downloading https://httpbin.org/redirect/1");
         if (host.node) {
-          expect(err.message).to.equal(
-            "Error downloading https://httpbin.org/redirect/1. \n" +
+          expect(err.message).toBe("Error downloading https://httpbin.org/redirect/1. \n" +
           "Too many redirects: \n" +
-          "  https://httpbin.org/redirect/1"
-          );
+          "  https://httpbin.org/redirect/1");
         }
       }
     });
@@ -156,9 +144,9 @@ describe("HTTP options", () => {
       // This should work by-default.
       let schema = await parser.parse("https://petstore.swagger.io/v2/swagger.json");
 
-      expect(schema).to.be.an("object");
-      expect(schema).not.to.be.empty;  // eslint-disable-line no-unused-expressions
-      expect(parser.schema).to.equal(schema);
+      expect(schema).toBeTypeOf("object");
+      expect(Object.keys(schema)).not.toHaveLength(0);
+      expect(parser.schema).toBe(schema);
     });
 
     it("should download successfully with http.withCredentials = false (default)", async () => {
@@ -170,9 +158,9 @@ describe("HTTP options", () => {
         resolve: { http: { withCredentials: false }}
       });
 
-      expect(schema).to.be.an("object");
-      expect(schema).not.to.be.empty;  // eslint-disable-line no-unused-expressions
-      expect(parser.schema).to.equal(schema);
+      expect(schema).toBeTypeOf("object");
+      expect(Object.keys(schema)).not.toHaveLength(0);
+      expect(parser.schema).toBe(schema);
     });
 
     if (host.browser) {
@@ -187,13 +175,13 @@ describe("HTTP options", () => {
           });
 
           // The request succeeded, which means this browser doesn't support CORS.
-          expect(schema).to.be.an("object");
-          expect(schema).not.to.be.empty;  // eslint-disable-line no-unused-expressions
-          expect(parser.schema).to.equal(schema);
+          expect(schema).toBeTypeOf("object");
+          expect(Object.keys(schema)).not.toHaveLength(0);
+          expect(parser.schema).toBe(schema);
         }
         catch (err) {
           // The request failed, which is expected
-          expect(err.message).to.contain("Error downloading https://petstore.swagger.io/v2/swagger.json");
+          expect(err.message).toContain("Error downloading https://petstore.swagger.io/v2/swagger.json");
         }
       });
     }

@@ -1,23 +1,21 @@
-"use strict";
-
-const { expect } = require("chai");
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const bundledSchema = require("./bundled");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import bundledSchema from "./bundled";
 
 describe("Schema with deeply-nested circular $refs", () => {
   it("should parse successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.rel("specs/deep-circular/deep-circular.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([path.abs("specs/deep-circular/deep-circular.yaml")]);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([path.abs("specs/deep-circular/deep-circular.yaml")]);
     // The "circular" flag should NOT be set
     // (it only gets set by `dereference`)
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 
   it("should resolve successfully", helper.testResolve(
@@ -30,17 +28,16 @@ describe("Schema with deeply-nested circular $refs", () => {
   it("should dereference successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.dereference(path.rel("specs/deep-circular/deep-circular.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(dereferencedSchema);
     // The "circular" flag should be set
-    expect(parser.$refs.circular).to.equal(true);
+    expect(parser.$refs.circular).toBe(true);
     // Reference equality
-    expect(schema.definitions.name)
-      .to.equal(schema.properties.name)
-      .to.equal(schema.properties.level1.properties.name)
-      .to.equal(schema.properties.level1.properties.level2.properties.name)
-      .to.equal(schema.properties.level1.properties.level2.properties.level3.properties.name)
-      .to.equal(schema.properties.level1.properties.level2.properties.level3.properties.level4.properties.name);
+    expect(schema.definitions.name).toBe(schema.properties.name);
+    expect(schema.definitions.name).toBe(schema.properties.level1.properties.name);
+    expect(schema.definitions.name).toBe(schema.properties.level1.properties.level2.properties.name);
+    expect(schema.definitions.name).toBe(schema.properties.level1.properties.level2.properties.level3.properties.name);
+    expect(schema.definitions.name).toBe(schema.properties.level1.properties.level2.properties.level3.properties.level4.properties.name);
   });
 
   it('should throw an error if "options.$refs.circular" is false', async () => {
@@ -52,10 +49,9 @@ describe("Schema with deeply-nested circular $refs", () => {
     }
     catch (err) {
       // A ReferenceError should have been thrown
-      expect(err).to.be.an.instanceOf(ReferenceError);
-      expect(err.message).to.contain("Circular $ref pointer found at ");
-      expect(err.message).to.contain(
-        "specs/deep-circular/deep-circular.yaml#/properties/level1/properties/level2/properties/" +
+      expect(err).toBeInstanceOf(ReferenceError);
+      expect(err.message).toContain("Circular $ref pointer found at ");
+      expect(err.message).toContain("specs/deep-circular/deep-circular.yaml#/properties/level1/properties/level2/properties/" +
         "level3/properties/level4/properties/level5/properties/level6/properties/level7/properties/" +
         "level8/properties/level9/properties/level10/properties/level11/properties/level12/properties/" +
         "level13/properties/level14/properties/level15/properties/level16/properties/level17/properties/" +
@@ -64,17 +60,17 @@ describe("Schema with deeply-nested circular $refs", () => {
         "level28/properties/level29/properties/level30");
 
       // $Refs.circular should be true
-      expect(parser.$refs.circular).to.equal(true);
+      expect(parser.$refs.circular).toBe(true);
     }
   });
 
   it("should bundle successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.bundle(path.rel("specs/deep-circular/deep-circular.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(bundledSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(bundledSchema);
     // The "circular" flag should NOT be set
     // (it only gets set by `dereference`)
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 });

@@ -1,12 +1,10 @@
-"use strict";
-
-const { expect } = require("chai");
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const bundledSchema = require("./bundled");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import bundledSchema from "./bundled";
 
 /**
  * This test is from PR #62
@@ -16,25 +14,25 @@ describe("Schema with two external refs to the same value and internal ref befor
   it("should parse successfully from an absolute path", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.abs("specs/external-from-internal/external-from-internal.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([path.abs("specs/external-from-internal/external-from-internal.yaml")]);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([path.abs("specs/external-from-internal/external-from-internal.yaml")]);
   });
 
   it("should parse successfully from a relative path", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.rel("specs/external-from-internal/external-from-internal.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([path.abs("specs/external-from-internal/external-from-internal.yaml")]);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([path.abs("specs/external-from-internal/external-from-internal.yaml")]);
   });
 
   it("should parse successfully from a url", async () => {
     let parser = new $RefParser();
     const schema = await parser.parse(path.url("specs/external-from-internal/external-from-internal.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(parsedSchema.schema);
-    expect(parser.$refs.paths()).to.deep.equal([path.url("specs/external-from-internal/external-from-internal.yaml")]);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(parsedSchema.schema);
+    expect(parser.$refs.paths()).toEqual([path.url("specs/external-from-internal/external-from-internal.yaml")]);
   });
 
   it("should resolve successfully from an absolute path", helper.testResolve(
@@ -58,27 +56,26 @@ describe("Schema with two external refs to the same value and internal ref befor
   it("should dereference successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.dereference(path.rel("specs/external-from-internal/external-from-internal.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(dereferencedSchema);
     // Reference equality
-    expect(schema.internal1).to.equal(schema.internal2);
-    expect(schema.internal2).to.equal(schema.external1);
-    expect(schema.internal3).to.equal(schema.internal4);
-    expect(schema.internal4).to.equal(schema.external2);
-    expect(schema.internal1.test)
-      .to.equal(schema.internal2.test)
-      .to.equal(schema.internal3.test)
-      .to.equal(schema.internal4.test)
-      .to.equal(schema.external1.test)
-      .to.equal(schema.external2.test);
+    expect(schema.internal1).toBe(schema.internal2);
+    expect(schema.internal2).toBe(schema.external1);
+    expect(schema.internal3).toBe(schema.internal4);
+    expect(schema.internal4).toBe(schema.external2);
+    expect(schema.internal1.test).toBe(schema.internal2.test);
+    expect(schema.internal1.test).toBe(schema.internal3.test);
+    expect(schema.internal1.test).toBe(schema.internal4.test);
+    expect(schema.internal1.test).toBe(schema.external1.test);
+    expect(schema.internal1.test).toBe(schema.external2.test);
     // The "circular" flag should NOT be set
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 
   it("should bundle successfully", async () => {
     let parser = new $RefParser();
     const schema = await parser.bundle(path.rel("specs/external-from-internal/external-from-internal.yaml"));
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(bundledSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(bundledSchema);
   });
 });

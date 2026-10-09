@@ -1,14 +1,9 @@
-"use strict";
-
-const { host } = require("@jsdevtools/host-environment");
-const chai = require("chai");
-const chaiSubset = require("chai-subset");
-chai.use(chaiSubset);
-const { expect } = chai;
-const $RefParser = require("../../../lib");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const { JSONParserErrorGroup, ParserError, ResolverError } = require("../../../lib/util/errors");
+import { describe, it, expect } from "vitest";
+import { host } from "@jsdevtools/host-environment";
+import $RefParser from "../../../lib";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import { JSONParserErrorGroup, ParserError, ResolverError } from "../../../lib/util/errors";
 
 describe("Invalid syntax", () => {
   describe("in main file", () => {
@@ -18,10 +13,10 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ResolverError);
+        expect(err).toBeInstanceOf(ResolverError);
         if (host.node) {
-          expect(err.ioErrorCode).to.equal("ENOENT");
-          expect(err.message).to.contain("Error opening file ");
+          expect(err.ioErrorCode).toBe("ENOENT");
+          expect(err.message).toContain("Error opening file ");
         }
       }
     });
@@ -32,9 +27,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.yaml");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.yaml");
       }
     });
 
@@ -44,9 +39,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.json");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.json");
       }
     });
 
@@ -56,9 +51,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.json");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.json");
       }
     });
 
@@ -68,8 +63,8 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(SyntaxError);
-        expect(err.message).to.contain('invalid/invalid.yaml" is not a valid JSON Schema');
+        expect(err).toBeInstanceOf(SyntaxError);
+        expect(err.message).toContain('invalid/invalid.yaml" is not a valid JSON Schema');
       }
     });
 
@@ -81,19 +76,19 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files).to.equal(parser);
-          expect(err.message).to.have.string("1 error occurred while reading '");
-          expect(err.message).to.have.string("this file does not exist'");
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files).toBe(parser);
+          expect(err.message).toContain("1 error occurred while reading '");
+          expect(err.message).toContain("this file does not exist'");
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ResolverError.name,
-              message: message => message.startsWith("Error opening file") || message.endsWith("HTTP ERROR 404"),
+              message: expect.toSatisfy(message => message.startsWith("Error opening file") || message.endsWith("HTTP ERROR 404")),
               path: [],
-              source: message => message.endsWith("this file does not exist") || message.startsWith("http://localhost"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("this file does not exist") || message.startsWith("http://localhost")),
+            })
+          ]));
         }
       });
 
@@ -104,20 +99,20 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files).to.equal(parser);
-          expect(err.message).to.equal(`1 error occurred while reading '${path.abs("specs/invalid/invalid.yaml")}'`);
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files).toBe(parser);
+          expect(err.message).toBe(`1 error occurred while reading '${path.abs("specs/invalid/invalid.yaml")}'`);
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.yaml: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (1:1)")
-              ),
+              )),
               path: [],
-              source: message => message.endsWith("test/specs/invalid/invalid.yaml"),
-            },
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("test/specs/invalid/invalid.yaml")),
+            }),
+          ]));
         }
       });
 
@@ -128,20 +123,20 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files).to.equal(parser);
-          expect(err.message).to.equal(`1 error occurred while reading '${path.abs("specs/invalid/invalid.json")}'`);
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files).toBe(parser);
+          expect(err.message).toBe(`1 error occurred while reading '${path.abs("specs/invalid/invalid.json")}'`);
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.json: unexpected end of the stream within a flow collection (2:1)")
-              ),
+              )),
               path: [],
-              source: message => message.endsWith("test/specs/invalid/invalid.json"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("test/specs/invalid/invalid.json")),
+            })
+          ]));
         }
       });
 
@@ -152,31 +147,31 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files).to.equal(parser);
-          expect(err.message).to.equal(`1 error occurred while reading '${path.abs("specs/invalid/invalid.json")}'`);
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files).toBe(parser);
+          expect(err.message).toBe(`1 error occurred while reading '${path.abs("specs/invalid/invalid.json")}'`);
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.json: Unexpected end of JSON input") ||
                 message.includes("invalid.json: JSON.parse: end of data while reading object contents") ||    // Firefox
                 message.includes("invalid.json: JSON Parse error: Expected '}'") ||                           // Safari
                 message.includes("invalid.json: JSON.parse Error: Invalid character") ||                      // Edge
                 message.includes("invalid.json: Syntax error")                                                // IE
-              ),
+              )),
               path: [],
-              source: message => message.endsWith("test/specs/invalid/invalid.json"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("test/specs/invalid/invalid.json")),
+            })
+          ]));
         }
       });
 
       it("should not throw an error for an invalid YAML file with JSON and YAML disabled", async () => {
         const parser = new $RefParser();
         const result = await parser.dereference(path.rel("specs/invalid/invalid.yaml"), { continueOnError: true, parse: { yaml: false, json: false }});
-        expect(result).to.equal(null);
+        expect(result).toBe(null);
       });
     });
   });
@@ -188,9 +183,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.yaml");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.yaml");
       }
     });
 
@@ -200,9 +195,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.json");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.json");
       }
     });
 
@@ -214,9 +209,9 @@ describe("Invalid syntax", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(ParserError);
-        expect(err.message).to.contain("Error parsing ");
-        expect(err.message).to.contain("invalid/invalid.json");
+        expect(err).toBeInstanceOf(ParserError);
+        expect(err.message).toContain("Error parsing ");
+        expect(err.message).toContain("invalid/invalid.json");
       }
     });
 
@@ -227,7 +222,7 @@ describe("Invalid syntax", () => {
         });
 
       // Because the JSON and YAML parsers were disabled, the invalid YAML file got parsed as plain text
-      expect(schema).to.deep.equal({
+      expect(schema).toEqual({
         foo: ":\n"
       });
     });
@@ -240,17 +235,17 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files.$refs._root$Ref.value).to.deep.equal({ foo: null });
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files.$refs._root$Ref.value).toEqual({ foo: null });
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ResolverError.name,
-              message: message => message.startsWith("Error opening file") || message.endsWith("HTTP ERROR 404"),
+              message: expect.toSatisfy(message => message.startsWith("Error opening file") || message.endsWith("HTTP ERROR 404")),
               path: ["foo"],
-              source: message => message.endsWith("/test/") || message.startsWith("http://localhost"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
+            })
+          ]));
         }
       });
 
@@ -261,19 +256,19 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files.$refs._root$Ref.value).to.deep.equal({ foo: null });
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files.$refs._root$Ref.value).toEqual({ foo: null });
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.yaml: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (1:1)")
-              ),
+              )),
               path: ["foo"],
-              source: message => message.endsWith("/test/") || message.startsWith("http://localhost"),
-            },
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
+            }),
+          ]));
         }
       });
 
@@ -284,19 +279,19 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files.$refs._root$Ref.value).to.deep.equal({ foo: null });
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files.$refs._root$Ref.value).toEqual({ foo: null });
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.json: unexpected end of the stream within a flow collection (2:1)")
-              ),
+              )),
               path: ["foo"],
-              source: message => message.endsWith("/test/") || message.startsWith("http://localhost"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
+            })
+          ]));
         }
       });
 
@@ -307,30 +302,30 @@ describe("Invalid syntax", () => {
           helper.shouldNotGetCalled();
         }
         catch (err) {
-          expect(err).to.be.instanceof(JSONParserErrorGroup);
-          expect(err.files.$refs._root$Ref.value).to.deep.equal({ foo: null });
-          expect(err.errors.length).to.equal(1);
-          expect(err.errors).to.containSubset([
-            {
+          expect(err).toBeInstanceOf(JSONParserErrorGroup);
+          expect(err.files.$refs._root$Ref.value).toEqual({ foo: null });
+          expect(err.errors.length).toBe(1);
+          expect(err.errors).toEqual(expect.arrayContaining([
+            expect.objectContaining({
               name: ParserError.name,
-              message: message => (
+              message: expect.toSatisfy(message => (
                 message.includes("invalid.json: Unexpected end of JSON input") ||
                 message.includes("invalid.json: JSON.parse: end of data while reading object contents") ||    // Firefox
                 message.includes("invalid.json: JSON Parse error: Expected '}'") ||                           // Safari
                 message.includes("invalid.json: JSON.parse Error: Invalid character") ||                      // Edge
                 message.includes("invalid.json: Syntax error")                                                // IE
-              ),
+              )),
               path: ["foo"],
-              source: message => message.endsWith("/test/") || message.startsWith("http://localhost"),
-            }
-          ]);
+              source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
+            })
+          ]));
         }
       });
 
       it("should not throw an error for an invalid YAML file with JSON and YAML disabled", async () => {
         const parser = new $RefParser();
         const result = await parser.dereference({ foo: { $ref: path.rel("specs/invalid/invalid.yaml") }}, { continueOnError: true, parse: { yaml: false, json: false }});
-        expect(result).to.deep.equal({ foo: ":\n" });
+        expect(result).toEqual({ foo: ":\n" });
       });
     });
   });

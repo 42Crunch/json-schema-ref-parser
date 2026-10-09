@@ -1,21 +1,16 @@
-"use strict";
-
-const chai = require("chai");
-const chaiSubset = require("chai-subset");
-chai.use(chaiSubset);
-const { expect } = chai;
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const { ResolverError, UnmatchedResolverError, JSONParserErrorGroup } = require("../../../lib/util/errors");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import { ResolverError, UnmatchedResolverError, JSONParserErrorGroup } from "../../../lib/util/errors";
 
 describe("options.resolve", () => {
   it('should not resolve external links if "resolve.external" is disabled', async () => {
     const schema = await $RefParser
       .dereference(path.abs("specs/resolvers/resolvers.yaml"), { resolve: { external: false }});
-    expect(schema).to.deep.equal(parsedSchema);
+    expect(schema).toEqual(parsedSchema);
   });
 
   it("should throw an error for unrecognized protocols", async () => {
@@ -24,8 +19,8 @@ describe("options.resolve", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.equal('Unable to resolve $ref pointer "foo://bar.baz"');
+      expect(err).toBeInstanceOf(SyntaxError);
+      expect(err.message).toBe('Unable to resolve $ref pointer "foo://bar.baz"');
     }
   });
 
@@ -40,7 +35,7 @@ describe("options.resolve", () => {
           }
         }
       });
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toEqual(dereferencedSchema);
   });
 
   it("should use a custom resolver that returns a value", async () => {
@@ -56,7 +51,7 @@ describe("options.resolve", () => {
           }
         }
       });
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toEqual(dereferencedSchema);
   });
 
   it("should use a custom resolver that calls a callback", async () => {
@@ -72,7 +67,7 @@ describe("options.resolve", () => {
           }
         }
       });
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toEqual(dereferencedSchema);
   });
 
   if (typeof Promise === "function") {
@@ -89,7 +84,7 @@ describe("options.resolve", () => {
             }
           }
         });
-      expect(schema).to.deep.equal(dereferencedSchema);
+      expect(schema).toEqual(dereferencedSchema);
     });
   }
 
@@ -112,7 +107,7 @@ describe("options.resolve", () => {
           }
         }
       });
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toEqual(dereferencedSchema);
   });
 
   it("should normalize errors thrown by resolvers", async () => {
@@ -132,8 +127,8 @@ describe("options.resolve", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.instanceof(ResolverError);
-      expect(err.message).to.contain("Error opening file");
+      expect(err).toBeInstanceOf(ResolverError);
+      expect(err.message).toContain("Error opening file");
     }
   });
 
@@ -155,7 +150,7 @@ describe("options.resolve", () => {
     }
     catch (err) {
       // would time out otherwise
-      expect(err).to.be.an.instanceOf(ResolverError);
+      expect(err).toBeInstanceOf(ResolverError);
     }
   });
 
@@ -172,16 +167,16 @@ describe("options.resolve", () => {
       helper.shouldNotGetCalled();
     }
     catch (err) {
-      expect(err).to.be.instanceof(JSONParserErrorGroup);
-      expect(err.errors.length).to.equal(1);
-      expect(err.errors).to.containSubset([
-        {
+      expect(err).toBeInstanceOf(JSONParserErrorGroup);
+      expect(err.errors.length).toBe(1);
+      expect(err.errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({
           name: UnmatchedResolverError.name,
-          message: message => message.startsWith("Could not find resolver for"),
+          message: expect.toSatisfy(message => message.startsWith("Could not find resolver for")),
           path: [],
-          source: message => message.endsWith("specs/resolvers/resolvers.yaml"),
-        },
-      ]);
+          source: expect.toSatisfy(message => message.endsWith("specs/resolvers/resolvers.yaml")),
+        }),
+      ]));
     }
   });
 });

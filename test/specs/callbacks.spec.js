@@ -1,10 +1,8 @@
-"use strict";
-
-const { expect } = require("chai");
-const $RefParser = require("../../lib");
-const helper = require("../utils/helper");
-const path = require("../utils/path");
-const { ParserError } = require("../../lib/util/errors");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../lib";
+import helper from "../utils/helper";
+import path from "../utils/path";
+import { ParserError } from "../../lib/util/errors";
 
 describe("Callback & Promise syntax", () => {
   for (let method of ["parse", "resolve", "dereference", "bundle"]) {
@@ -17,41 +15,41 @@ describe("Callback & Promise syntax", () => {
   }
 
   function testCallbackSuccess (method) {
-    return function (done) {
+    return () => new Promise((resolve, reject) => {
       let parser = new $RefParser();
       parser[method](path.rel("specs/internal/internal.yaml"), (err, result) => {
         try {
-          expect(err).to.equal(null);
-          expect(result).to.be.an("object");
+          expect(err).toBe(null);
+          expect(result).toBeTypeOf("object");
 
           if (method === "resolve") {
-            expect(result).to.equal(parser.$refs);
+            expect(result).toBe(parser.$refs);
           }
           else {
-            expect(result).to.equal(parser.schema);
+            expect(result).toBe(parser.schema);
           }
-          done();
+          resolve();
         }
         catch (e) {
-          done(e);
+          reject(e);
         }
       });
-    };
+    });
   }
 
   function testCallbackError (method) {
-    return function (done) {
+    return () => new Promise((resolve, reject) => {
       $RefParser[method](path.rel("specs/invalid/invalid.yaml"), (err, result) => {
         try {
-          expect(err).to.be.an.instanceOf(ParserError);
-          expect(result).to.equal(undefined);
-          done();
+          expect(err).toBeInstanceOf(ParserError);
+          expect(result).toBe(undefined);
+          resolve();
         }
         catch (e) {
-          done(e);
+          reject(e);
         }
       });
-    };
+    });
   }
 
   function testPromiseSuccess (method) {
@@ -59,13 +57,13 @@ describe("Callback & Promise syntax", () => {
       let parser = new $RefParser();
       return parser[method](path.rel("specs/internal/internal.yaml"))
         .then((result) => {
-          expect(result).to.be.an("object");
+          expect(result).toBeTypeOf("object");
 
           if (method === "resolve") {
-            expect(result).to.equal(parser.$refs);
+            expect(result).toBe(parser.$refs);
           }
           else {
-            expect(result).to.equal(parser.schema);
+            expect(result).toBe(parser.schema);
           }
         });
     };
@@ -76,7 +74,7 @@ describe("Callback & Promise syntax", () => {
       return $RefParser[method](path.rel("specs/invalid/invalid.yaml"))
         .then(helper.shouldNotGetCalled)
         .catch((err) => {
-          expect(err).to.be.an.instanceOf(ParserError);
+          expect(err).toBeInstanceOf(ParserError);
         });
     };
   }

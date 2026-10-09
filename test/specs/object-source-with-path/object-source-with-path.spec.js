@@ -1,14 +1,12 @@
-"use strict";
-
-const { expect } = require("chai");
-const $RefParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const internalRefsParsedSchema = require("../internal/parsed");
-const internalRefsDereferencedSchema = require("../internal/dereferenced");
-const parsedSchema = require("./parsed");
-const dereferencedSchema = require("./dereferenced");
-const bundledSchema = require("./bundled");
+import { describe, it, expect } from "vitest";
+import $RefParser from "../../..";
+import helper from "../../utils/helper";
+import path from "../../utils/path";
+import internalRefsParsedSchema from "../internal/parsed";
+import internalRefsDereferencedSchema from "../internal/dereferenced";
+import parsedSchema from "./parsed";
+import dereferencedSchema from "./dereferenced";
+import bundledSchema from "./bundled";
 
 describe("Object sources with file paths", () => {
   it("should dereference a single object", async () => {
@@ -20,21 +18,20 @@ describe("Object sources with file paths", () => {
       helper.cloneDeep(internalRefsParsedSchema),
       // An options object MUST be passed (even if it's empty)
       {});
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(internalRefsDereferencedSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(internalRefsDereferencedSchema);
     // The schema path should match the one we pass-in
     let expectedPaths = [
       path.abs("path/that/does/not/exist.yaml")
     ];
-    expect(parser.$refs.paths()).to.have.same.members(expectedPaths);
-    expect(parser.$refs.values()).to.have.keys(expectedPaths);
+    expect([...parser.$refs.paths()].sort()).toEqual([...expectedPaths].sort());
+    expect(Object.keys(parser.$refs.values()).sort()).toEqual([...expectedPaths].sort());
     // Reference equality
-    expect(schema.properties.name).to.equal(schema.definitions.name);
-    expect(schema.definitions.requiredString)
-      .to.equal(schema.definitions.name.properties.first)
-      .to.equal(schema.definitions.name.properties.last)
-      .to.equal(schema.properties.name.properties.first)
-      .to.equal(schema.properties.name.properties.last);
+    expect(schema.properties.name).toBe(schema.definitions.name);
+    expect(schema.definitions.requiredString).toBe(schema.definitions.name.properties.first);
+    expect(schema.definitions.requiredString).toBe(schema.definitions.name.properties.last);
+    expect(schema.definitions.requiredString).toBe(schema.properties.name.properties.first);
+    expect(schema.definitions.requiredString).toBe(schema.properties.name.properties.last);
   });
 
   it("should dereference an object that references external files", async () => {
@@ -46,8 +43,8 @@ describe("Object sources with file paths", () => {
       helper.cloneDeep(parsedSchema.schema),
       // An options object MUST be passed (even if it's empty)
       {});
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(dereferencedSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(dereferencedSchema);
     // The schema path should match the one we passed-in.
     // All other paths should be the actual paths of referenced files.
     let expectedPaths = [
@@ -56,17 +53,16 @@ describe("Object sources with file paths", () => {
       path.abs("specs/object-source-with-path/definitions/name.yaml"),
       path.abs("specs/object-source-with-path/definitions/required-string.yaml")
     ];
-    expect(parser.$refs.paths()).to.have.same.members(expectedPaths);
-    expect(parser.$refs.values()).to.have.keys(expectedPaths);
+    expect([...parser.$refs.paths()].sort()).toEqual([...expectedPaths].sort());
+    expect(Object.keys(parser.$refs.values()).sort()).toEqual([...expectedPaths].sort());
     // Reference equality
-    expect(schema.properties.name).to.equal(schema.definitions.name);
-    expect(schema.definitions.requiredString)
-      .to.equal(schema.definitions.name.properties.first)
-      .to.equal(schema.definitions.name.properties.last)
-      .to.equal(schema.properties.name.properties.first)
-      .to.equal(schema.properties.name.properties.last);
+    expect(schema.properties.name).toBe(schema.definitions.name);
+    expect(schema.definitions.requiredString).toBe(schema.definitions.name.properties.first);
+    expect(schema.definitions.requiredString).toBe(schema.definitions.name.properties.last);
+    expect(schema.definitions.requiredString).toBe(schema.properties.name.properties.first);
+    expect(schema.definitions.requiredString).toBe(schema.properties.name.properties.last);
     // The "circular" flag should NOT be set
-    expect(parser.$refs.circular).to.equal(false);
+    expect(parser.$refs.circular).toBe(false);
   });
 
   it("should bundle an object that references external files", async () => {
@@ -78,8 +74,8 @@ describe("Object sources with file paths", () => {
       helper.cloneDeep(parsedSchema.schema),
       // An options object MUST be passed (even if it's empty)
       {});
-    expect(schema).to.equal(parser.schema);
-    expect(schema).to.deep.equal(bundledSchema);
+    expect(schema).toBe(parser.schema);
+    expect(schema).toEqual(bundledSchema);
     // The schema path should match the one we passed-in.
     // All other paths should be the actual paths of referenced files.
     let expectedPaths = [
@@ -88,7 +84,7 @@ describe("Object sources with file paths", () => {
       path.abs("specs/object-source-with-path/definitions/name.yaml"),
       path.abs("specs/object-source-with-path/definitions/required-string.yaml")
     ];
-    expect(parser.$refs.paths()).to.have.same.members(expectedPaths);
-    expect(parser.$refs.values()).to.have.keys(expectedPaths);
+    expect([...parser.$refs.paths()].sort()).toEqual([...expectedPaths].sort());
+    expect(Object.keys(parser.$refs.values()).sort()).toEqual([...expectedPaths].sort());
   });
 });

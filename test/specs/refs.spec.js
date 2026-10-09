@@ -1,13 +1,11 @@
-"use strict";
-
-const { host } = require("@jsdevtools/host-environment");
-const { expect } = require("chai");
-const $RefParser = require("../../lib");
-const helper = require("../utils/helper");
-const path = require("../utils/path");
-const parsedSchema = require("./external/parsed");
-const dereferencedSchema = require("./external/dereferenced");
-const bundledSchema = require("./external/bundled");
+import { describe, it, expect } from "vitest";
+import { host } from "@jsdevtools/host-environment";
+import $RefParser from "../../lib";
+import helper from "../utils/helper";
+import path from "../utils/path";
+import parsedSchema from "./external/parsed";
+import dereferencedSchema from "./external/dereferenced";
+import bundledSchema from "./external/bundled";
 
 describe("$Refs object", () => {
   describe("paths", () => {
@@ -15,22 +13,22 @@ describe("$Refs object", () => {
       let parser = new $RefParser();
       await parser.parse(path.abs("specs/external/external.yaml"));
       let paths = parser.$refs.paths();
-      expect(paths).to.have.same.members([
+      expect([...paths].sort()).toEqual([
         path.abs("specs/external/external.yaml")
-      ]);
+      ].sort());
     });
 
     it("should contain all files when calling `resolve()`", async () => {
       let parser = new $RefParser();
       const $refs = await parser.resolve(path.abs("specs/external/external.yaml"));
-      expect($refs).to.equal(parser.$refs);
+      expect($refs).toBe(parser.$refs);
       let paths = $refs.paths();
-      expect(paths).to.have.same.members([
+      expect([...paths].sort()).toEqual([
         path.abs("specs/external/external.yaml"),
         path.abs("specs/external/definitions/definitions.json"),
         path.abs("specs/external/definitions/name.yaml"),
         path.abs("specs/external/definitions/required-string.yaml")
-      ]);
+      ].sort());
     });
 
     it("should return only local files", async () => {
@@ -38,15 +36,15 @@ describe("$Refs object", () => {
         .resolve(path.abs("specs/external/external.yaml"));
       let paths = $refs.paths("file");
       if (host.node) {
-        expect(paths).to.have.same.members([
+        expect([...paths].sort()).toEqual([
           path.abs("specs/external/external.yaml"),
           path.abs("specs/external/definitions/definitions.json"),
           path.abs("specs/external/definitions/name.yaml"),
           path.abs("specs/external/definitions/required-string.yaml")
-        ]);
+        ].sort());
       }
       else {
-        expect(paths).to.be.an("array").with.lengthOf(0);
+        expect(paths).toEqual([]);
       }
     });
 
@@ -55,15 +53,15 @@ describe("$Refs object", () => {
         .resolve(path.abs("specs/external/external.yaml"));
       let paths = $refs.paths(["http"]);
       if (host.browser) {
-        expect(paths).to.have.same.members([
+        expect([...paths].sort()).toEqual([
           path.url("specs/external/external.yaml"),
           path.url("specs/external/definitions/definitions.json"),
           path.url("specs/external/definitions/name.yaml"),
           path.url("specs/external/definitions/required-string.yaml")
-        ]);
+        ].sort());
       }
       else {
-        expect(paths).to.be.an("array").with.lengthOf(0);
+        expect(paths).toEqual([]);
       }
     });
   });
@@ -72,7 +70,7 @@ describe("$Refs object", () => {
     it("should be the same as `toJSON()`", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.values).to.equal($refs.toJSON);
+      expect($refs.values).toBe($refs.toJSON);
     });
 
     it("should return the paths and values of all resolved files", async () => {
@@ -84,7 +82,7 @@ describe("$Refs object", () => {
       expected[path.abs("specs/external/definitions/name.yaml")] = parsedSchema.name;
       expected[path.abs("specs/external/definitions/required-string.yaml")] = parsedSchema.requiredString;
       let values = $refs.values();
-      expect(values).to.deep.equal(expected);
+      expect(values).toEqual(expected);
     });
 
     it("should return the paths and values of all dereferenced files", async () => {
@@ -96,7 +94,7 @@ describe("$Refs object", () => {
       expected[path.abs("specs/external/definitions/name.yaml")] = dereferencedSchema.definitions.name;
       expected[path.abs("specs/external/definitions/required-string.yaml")] = dereferencedSchema.definitions["required string"];
       let values = parser.$refs.values();
-      expect(values).to.deep.equal(expected);
+      expect(values).toEqual(expected);
     });
 
     it("should return the paths and values of all bundled files", async () => {
@@ -108,7 +106,7 @@ describe("$Refs object", () => {
       expected[path.abs("specs/external/definitions/name.yaml")] = bundledSchema.definitions.name;
       expected[path.abs("specs/external/definitions/required-string.yaml")] = bundledSchema.definitions["required string"];
       let values = parser.$refs.values();
-      expect(values).to.deep.equal(expected);
+      expect(values).toEqual(expected);
     });
 
     it("should return only local files and values", async () => {
@@ -122,10 +120,10 @@ describe("$Refs object", () => {
         expected[path.abs("specs/external/definitions/name.yaml")] = parsedSchema.name;
         expected[path.abs("specs/external/definitions/required-string.yaml")] = parsedSchema.requiredString;
         values = $refs.values();
-        expect(values).to.deep.equal(expected);
+        expect(values).toEqual(expected);
       }
       else {
-        expect(values).to.be.an("object").and.empty;  // eslint-disable-line no-unused-expressions
+        expect(values).toEqual({});
       }
     });
 
@@ -140,10 +138,10 @@ describe("$Refs object", () => {
         expected[path.url("specs/external/definitions/name.yaml")] = parsedSchema.name;
         expected[path.url("specs/external/definitions/required-string.yaml")] = parsedSchema.requiredString;
         values = $refs.values();
-        expect(values).to.deep.equal(expected);
+        expect(values).toEqual(expected);
       }
       else {
-        expect(values).to.be.an("object").and.empty;  // eslint-disable-line no-unused-expressions
+        expect(values).toEqual({});
       }
     });
   });
@@ -152,25 +150,25 @@ describe("$Refs object", () => {
     it("should work with absolute paths", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.exists(path.abs("specs/external/external.yaml"))).to.equal(true);
-      expect($refs.exists(path.abs("specs/external/definitions/definitions.json"))).to.equal(true);
-      expect($refs.exists(path.abs("specs/external/definitions/name.yaml"))).to.equal(true);
-      expect($refs.exists(path.abs("specs/external/definitions/required-string.yaml"))).to.equal(true);
+      expect($refs.exists(path.abs("specs/external/external.yaml"))).toBe(true);
+      expect($refs.exists(path.abs("specs/external/definitions/definitions.json"))).toBe(true);
+      expect($refs.exists(path.abs("specs/external/definitions/name.yaml"))).toBe(true);
+      expect($refs.exists(path.abs("specs/external/definitions/required-string.yaml"))).toBe(true);
     });
 
     it("should work with relative paths", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.exists("external.yaml")).to.equal(true);
-      expect($refs.exists("definitions/definitions.json")).to.equal(true);
-      expect($refs.exists("definitions/name.yaml")).to.equal(true);
-      expect($refs.exists("definitions/required-string.yaml")).to.equal(true);
+      expect($refs.exists("external.yaml")).toBe(true);
+      expect($refs.exists("definitions/definitions.json")).toBe(true);
+      expect($refs.exists("definitions/name.yaml")).toBe(true);
+      expect($refs.exists("definitions/required-string.yaml")).toBe(true);
     });
 
     it("should return false if the $ref does not exist", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.exists("foo bar")).to.equal(false);
+      expect($refs.exists("foo bar")).toBe(false);
     });
   });
 
@@ -178,33 +176,33 @@ describe("$Refs object", () => {
     it("should work with absolute paths", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.get(path.abs("specs/external/external.yaml"))).to.deep.equal(parsedSchema.schema);
-      expect($refs.get(path.abs("specs/external/definitions/definitions.json"))).to.deep.equal(parsedSchema.definitions);
-      expect($refs.get(path.abs("specs/external/definitions/name.yaml"))).to.deep.equal(parsedSchema.name);
-      expect($refs.get(path.abs("specs/external/definitions/required-string.yaml"))).to.deep.equal(parsedSchema.requiredString);
+      expect($refs.get(path.abs("specs/external/external.yaml"))).toEqual(parsedSchema.schema);
+      expect($refs.get(path.abs("specs/external/definitions/definitions.json"))).toEqual(parsedSchema.definitions);
+      expect($refs.get(path.abs("specs/external/definitions/name.yaml"))).toEqual(parsedSchema.name);
+      expect($refs.get(path.abs("specs/external/definitions/required-string.yaml"))).toEqual(parsedSchema.requiredString);
     });
 
     it("should work with relative paths", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.get("external.yaml")).to.deep.equal(parsedSchema.schema);
-      expect($refs.get("definitions/definitions.json")).to.deep.equal(parsedSchema.definitions);
-      expect($refs.get("definitions/name.yaml")).to.deep.equal(parsedSchema.name);
-      expect($refs.get("definitions/required-string.yaml")).to.deep.equal(parsedSchema.requiredString);
+      expect($refs.get("external.yaml")).toEqual(parsedSchema.schema);
+      expect($refs.get("definitions/definitions.json")).toEqual(parsedSchema.definitions);
+      expect($refs.get("definitions/name.yaml")).toEqual(parsedSchema.name);
+      expect($refs.get("definitions/required-string.yaml")).toEqual(parsedSchema.requiredString);
     });
 
     it("should get the entire file if there is no hash", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
       let value = $refs.get("definitions/name.yaml");
-      expect(value).to.deep.equal(parsedSchema.name);
+      expect(value).toEqual(parsedSchema.name);
     });
 
     it("should get the entire file if the hash is empty", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
       let value = $refs.get("definitions/name.yaml#");
-      expect(value).to.deep.equal(parsedSchema.name);
+      expect(value).toEqual(parsedSchema.name);
     });
 
     it('should try to get an empty key if the hash is "#/"', async () => {
@@ -215,20 +213,20 @@ describe("$Refs object", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('Token "" does not exist.');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('Token "" does not exist.');
       }
     });
 
     it("should resolve values across multiple files if necessary", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
-      expect($refs.get("external.yaml#/properties/name/properties/first")).to.deep.equal({
+      expect($refs.get("external.yaml#/properties/name/properties/first")).toEqual({
         title: "required string",
         type: "string",
         minLength: 1
       });
-      expect($refs.get("external.yaml#/properties/name/properties/first/title")).to.equal("required string");
+      expect($refs.get("external.yaml#/properties/name/properties/first/title")).toBe("required string");
     });
 
     it("should throw an error if the file does not exist", async () => {
@@ -239,9 +237,9 @@ describe("$Refs object", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.contain('Error resolving $ref pointer "foo-bar.yaml#/some/value".');
-        expect(err.message).to.contain('foo-bar.yaml" not found.');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toContain('Error resolving $ref pointer "foo-bar.yaml#/some/value".');
+        expect(err.message).toContain('foo-bar.yaml" not found.');
       }
     });
 
@@ -253,8 +251,8 @@ describe("$Refs object", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal('Token "foo" does not exist.');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toBe('Token "foo" does not exist.');
       }
     });
   });
@@ -265,21 +263,21 @@ describe("$Refs object", () => {
         .resolve(path.abs("specs/external/external.yaml"));
       let $ref = path.abs("specs/external/external.yaml") + "#/properties/name";
       $refs.set($ref, { foo: "bar" });
-      expect($refs.get("external.yaml#/properties/name")).to.deep.equal({ foo: "bar" });
+      expect($refs.get("external.yaml#/properties/name")).toEqual({ foo: "bar" });
     });
 
     it("should work with relative paths", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
       $refs.set("external.yaml#/properties/name", { foo: "bar" });
-      expect($refs.get("external.yaml#/properties/name")).to.deep.equal({ foo: "bar" });
+      expect($refs.get("external.yaml#/properties/name")).toEqual({ foo: "bar" });
     });
 
     it("should resolve values across multiple files if necessary", async () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
       $refs.set("external.yaml#/properties/name/properties/first/title", "foo bar");
-      expect($refs.get("external.yaml#/properties/name/properties/first/title")).to.equal("foo bar");
+      expect($refs.get("external.yaml#/properties/name/properties/first/title")).toBe("foo bar");
     });
 
     it("should throw an error if the file does not exist", async () => {
@@ -290,9 +288,9 @@ describe("$Refs object", () => {
         helper.shouldNotGetCalled();
       }
       catch (err) {
-        expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.contain('Error resolving $ref pointer "foo-bar.yaml#/some/path".');
-        expect(err.message).to.contain('foo-bar.yaml" not found.');
+        expect(err).toBeInstanceOf(Error);
+        expect(err.message).toContain('Error resolving $ref pointer "foo-bar.yaml#/some/path".');
+        expect(err.message).toContain('foo-bar.yaml" not found.');
       }
     });
 
@@ -300,7 +298,7 @@ describe("$Refs object", () => {
       const $refs = await $RefParser
         .resolve(path.abs("specs/external/external.yaml"));
       $refs.set("external.yaml#/foo/bar/baz", { hello: "world" });
-      expect($refs.get("external.yaml#/foo/bar/baz")).to.deep.equal({ hello: "world" });
+      expect($refs.get("external.yaml#/foo/bar/baz")).toEqual({ hello: "world" });
     });
   });
 

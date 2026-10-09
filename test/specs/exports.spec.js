@@ -1,10 +1,10 @@
-/* eslint-disable require-await */
-"use strict";
+import { describe, it, expect } from "vitest";
+import { createRequire } from "module";
 
-const { expect } = require("chai");
+const require = createRequire(import.meta.url);
 const commonJSExport = require("../../");
-const { default: defaultExport } = require("../../");
 const {
+  default: defaultExport,
   JSONParserError,
   InvalidPointerError,
   MissingPointerError,
@@ -12,68 +12,77 @@ const {
   ParserError,
   UnmatchedParserError,
   UnmatchedResolverError,
-} = require("../../");
+} = commonJSExport;
 
 describe("json-schema-ref-parser package exports", () => {
 
   function is$RefParser (parser) {
-    expect(parser).to.be.a("function").with.property("name", "$RefParser");
-    expect(parser.parse).to.be.a("function").with.property("name", "parse");
-    expect(parser.prototype.parse).to.be.a("function").with.property("name", "parse");
-    expect(parser.resolve).to.be.a("function").with.property("name", "resolve");
-    expect(parser.prototype.resolve).to.be.a("function").with.property("name", "resolve");
-    expect(parser.dereference).to.be.a("function").with.property("name", "dereference");
-    expect(parser.prototype.dereference).to.be.a("function").with.property("name", "dereference");
-    expect(parser.bundle).to.be.a("function").with.property("name", "bundle");
-    expect(parser.prototype.bundle).to.be.a("function").with.property("name", "bundle");
+    expect(parser).toBeTypeOf("function");
+    expect(parser).toHaveProperty("name", "$RefParser");
+    expect(parser.parse).toBeTypeOf("function");
+    expect(parser.parse).toHaveProperty("name", "parse");
+    expect(parser.prototype.parse).toBeTypeOf("function");
+    expect(parser.prototype.parse).toHaveProperty("name", "parse");
+    expect(parser.resolve).toBeTypeOf("function");
+    expect(parser.resolve).toHaveProperty("name", "resolve");
+    expect(parser.prototype.resolve).toBeTypeOf("function");
+    expect(parser.prototype.resolve).toHaveProperty("name", "resolve");
+    expect(parser.dereference).toBeTypeOf("function");
+    expect(parser.dereference).toHaveProperty("name", "dereference");
+    expect(parser.prototype.dereference).toBeTypeOf("function");
+    expect(parser.prototype.dereference).toHaveProperty("name", "dereference");
+    expect(parser.bundle).toBeTypeOf("function");
+    expect(parser.bundle).toHaveProperty("name", "bundle");
+    expect(parser.prototype.bundle).toBeTypeOf("function");
+    expect(parser.prototype.bundle).toHaveProperty("name", "bundle");
     return true;
   }
 
   it("should export the $RefParser class as the default CommonJS export", async () => {
-    expect(commonJSExport).to.satisfy(is$RefParser);
+    expect(commonJSExport).toSatisfy(is$RefParser);
   });
 
   it("should export the $RefParser class as the default ESM export", async () => {
-    expect(defaultExport).to.satisfy(is$RefParser);
+    expect(defaultExport).toSatisfy(is$RefParser);
   });
 
   it("should export the JSONParserError class as a named ESM export", async () => {
-    expect(JSONParserError).to.be.a("function");
-    expect(JSONParserError.name).to.equal("JSONParserError");
+    expect(JSONParserError).toBeTypeOf("function");
+    expect(JSONParserError.name).toBe("JSONParserError");
   });
 
   it("should export the InvalidPointerError class as a named ESM export", async () => {
-    expect(InvalidPointerError).to.be.a("function");
-    expect(InvalidPointerError.name).to.equal("InvalidPointerError");
+    expect(InvalidPointerError).toBeTypeOf("function");
+    expect(InvalidPointerError.name).toBe("InvalidPointerError");
   });
 
   it("should export the MissingPointerError class as a named ESM export", async () => {
-    expect(MissingPointerError).to.be.a("function");
-    expect(MissingPointerError.name).to.equal("MissingPointerError");
+    expect(MissingPointerError).toBeTypeOf("function");
+    expect(MissingPointerError.name).toBe("MissingPointerError");
   });
 
   it("should export the ResolverError class as a named ESM export", async () => {
-    expect(ResolverError).to.be.a("function");
-    expect(ResolverError.name).to.equal("ResolverError");
+    expect(ResolverError).toBeTypeOf("function");
+    expect(ResolverError.name).toBe("ResolverError");
   });
 
   it("should export the ParserError class as a named ESM export", async () => {
-    expect(ParserError).to.be.a("function");
-    expect(ParserError.name).to.equal("ParserError");
+    expect(ParserError).toBeTypeOf("function");
+    expect(ParserError.name).toBe("ParserError");
   });
 
   it("should export the UnmatchedParserError class as a named ESM export", async () => {
-    expect(UnmatchedParserError).to.be.a("function");
-    expect(UnmatchedParserError.name).to.equal("UnmatchedParserError");
+    expect(UnmatchedParserError).toBeTypeOf("function");
+    expect(UnmatchedParserError.name).toBe("UnmatchedParserError");
   });
 
   it("should export the UnmatchedResolverError class as a named ESM export", async () => {
-    expect(UnmatchedResolverError).to.be.a("function");
-    expect(UnmatchedResolverError.name).to.equal("UnmatchedResolverError");
+    expect(UnmatchedResolverError).toBeTypeOf("function");
+    expect(UnmatchedResolverError.name).toBe("UnmatchedResolverError");
   });
 
   it("should not export anything else", async () => {
-    expect(commonJSExport).to.have.same.keys(
+    expect(Object.keys(commonJSExport).sort()).toEqual([
       "default",
       "parse",
       "resolve",
@@ -86,7 +95,7 @@ describe("json-schema-ref-parser package exports", () => {
       "ParserError",
       "UnmatchedParserError",
       "UnmatchedResolverError",
-    );
+    ].sort());
   });
 
 });

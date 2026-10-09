@@ -25,9 +25,9 @@ jobs:
           - macos-latest
           - windows-latest
         node:
-          - 10
-          - 12
-          - 14
+          - 22
+          - 24
+          - 26
 
     steps:
       - name: Checkout source
@@ -42,7 +42,7 @@ jobs:
         run: npm ci
 
       - name: Run Node tests
-        run: npm run test:node
+        run: npm test
 
   release:
     name: Release
