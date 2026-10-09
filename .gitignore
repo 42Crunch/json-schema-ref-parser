@@ -34,7 +34,3 @@ pids
 
 # Dependencies
 node_modules
-
-# Test output
-/.nyc_output
-/coverage
