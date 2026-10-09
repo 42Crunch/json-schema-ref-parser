@@ -156,6 +156,7 @@ describe("Invalid syntax", () => {
               name: ParserError.name,
               message: expect.toSatisfy(message => (
                 message.includes("invalid.json: Unexpected end of JSON input") ||
+                message.includes("invalid.json: Expected property name or '}' in JSON") ||                    // Node 20+
                 message.includes("invalid.json: JSON.parse: end of data while reading object contents") ||    // Firefox
                 message.includes("invalid.json: JSON Parse error: Expected '}'") ||                           // Safari
                 message.includes("invalid.json: JSON.parse Error: Invalid character") ||                      // Edge
@@ -310,6 +311,7 @@ describe("Invalid syntax", () => {
               name: ParserError.name,
               message: expect.toSatisfy(message => (
                 message.includes("invalid.json: Unexpected end of JSON input") ||
+                message.includes("invalid.json: Expected property name or '}' in JSON") ||                    // Node 20+
                 message.includes("invalid.json: JSON.parse: end of data while reading object contents") ||    // Firefox
                 message.includes("invalid.json: JSON Parse error: Expected '}'") ||                           // Safari
                 message.includes("invalid.json: JSON.parse Error: Invalid character") ||                      // Edge

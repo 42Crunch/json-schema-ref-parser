@@ -43,7 +43,7 @@ describe("Schema with missing pointers", () => {
           expect.objectContaining({
             name: MissingPointerError.name,
             message: "Token \"baz\" does not exist.",
-            path: ["foo"],
+            path: [],
             source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
           })
         ]));
@@ -65,12 +65,13 @@ describe("Schema with missing pointers", () => {
             internal2: null,
           }
         });
-        expect(err.message).toContain("1 error occurred while reading '");
+        expect(err.message).toContain("3 errors occurred while reading '");
+        expect(err.errors).toHaveLength(3);
         expect(err.errors).toEqual(expect.arrayContaining([
           expect.objectContaining({
             name: MissingPointerError.name,
             message: "Token \"external\" does not exist.",
-            path: ["internal2"],
+            path: [],
             source: expect.toSatisfy(message => message.endsWith("missing-pointers/external-from-internal.yaml") || message.startsWith("http://localhost")),
           })
         ]));

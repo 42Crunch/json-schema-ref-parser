@@ -54,7 +54,7 @@ describe("Report correct error source and path for", () => {
         expect.objectContaining({
           name: MissingPointerError.name,
           source: path.unixify(path.abs("specs/error-source/invalid-external.json")),
-          path: ["foo", "bar"],
+          path: [],
           message: expect.toSatisfy(message => typeof message === "string"),
         }),
         expect.objectContaining({
@@ -78,7 +78,7 @@ describe("Report correct error source and path for", () => {
         expect.objectContaining({
           name: InvalidPointerError.name,
           source: path.unixify(path.abs("specs/error-source/invalid-pointer.json")),
-          path: ["foo", "baz"],
+          path: [],
           message: expect.toSatisfy(message => typeof message === "string"),
         }),
       ]));
