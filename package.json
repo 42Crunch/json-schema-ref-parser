@@ -41,16 +41,13 @@
     "lib"
   ],
   "scripts": {
-    "build": "cp LICENSE *.md dist",
     "test": "vitest run",
     "upgrade": "npm-check -u && npm audit fix"
   },
   "devDependencies": {
-    "@amanda-mitchell/semantic-release-npm-multiple": "^2.5.0",
     "@jsdevtools/host-environment": "^2.1.2",
     "@types/node": "^25.7.0",
     "npm-check": "^5.9.0",
-    "semantic-release-plugin-update-version-in-files": "^1.1.0",
     "vitest": "^5.0.3"
   },
   "dependencies": {
@@ -58,35 +55,5 @@
     "@types/json-schema": "^7.0.6",
     "call-me-maybe": "^1.0.1",
     "js-yaml": "^4.3.2"
-  },
-  "release": {
-    "branches": ["main"],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "semantic-release-plugin-update-version-in-files",
-        {
-          "files": [
-            "dist/package.json"
-          ],
-          "placeholder": "X.X.X"
-        }
-      ],
-      [
-        "@amanda-mitchell/semantic-release-npm-multiple",
-        {
-          "registries": {
-            "scoped": {
-              "pkgRoot": "."
-            },
-            "unscoped": {
-              "pkgRoot": "dist"
-            }
-          }
-        }
-      ],
-      "@semantic-release/github"
-    ]
   }
 }
