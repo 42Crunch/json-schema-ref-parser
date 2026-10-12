@@ -107,7 +107,7 @@ describe("Invalid syntax", () => {
             expect.objectContaining({
               name: ParserError.name,
               message: expect.toSatisfy(message => (
-                message.includes("invalid.yaml: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (1:1)")
+                message.includes("invalid.yaml: Flow sequence in block collection must be sufficiently indented and end with a ] (2:1)")
               )),
               path: [],
               source: expect.toSatisfy(message => message.endsWith("test/specs/invalid/invalid.yaml")),
@@ -131,7 +131,7 @@ describe("Invalid syntax", () => {
             expect.objectContaining({
               name: ParserError.name,
               message: expect.toSatisfy(message => (
-                message.includes("invalid.json: unexpected end of the stream within a flow collection (2:1)")
+                message.includes("invalid.json: Flow map must end with a } (2:1)")
               )),
               path: [],
               source: expect.toSatisfy(message => message.endsWith("test/specs/invalid/invalid.json")),
@@ -224,7 +224,7 @@ describe("Invalid syntax", () => {
 
       // Because the JSON and YAML parsers were disabled, the invalid YAML file got parsed as plain text
       expect(schema).toEqual({
-        foo: ":\n"
+        foo: "foo: [bar\n"
       });
     });
 
@@ -264,7 +264,7 @@ describe("Invalid syntax", () => {
             expect.objectContaining({
               name: ParserError.name,
               message: expect.toSatisfy(message => (
-                message.includes("invalid.yaml: incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line (1:1)")
+                message.includes("invalid.yaml: Flow sequence in block collection must be sufficiently indented and end with a ] (2:1)")
               )),
               path: ["foo"],
               source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
@@ -287,7 +287,7 @@ describe("Invalid syntax", () => {
             expect.objectContaining({
               name: ParserError.name,
               message: expect.toSatisfy(message => (
-                message.includes("invalid.json: unexpected end of the stream within a flow collection (2:1)")
+                message.includes("invalid.json: Flow map must end with a } (2:1)")
               )),
               path: ["foo"],
               source: expect.toSatisfy(message => message.endsWith("/test/") || message.startsWith("http://localhost")),
@@ -327,7 +327,7 @@ describe("Invalid syntax", () => {
       it("should not throw an error for an invalid YAML file with JSON and YAML disabled", async () => {
         const parser = new $RefParser();
         const result = await parser.dereference({ foo: { $ref: path.rel("specs/invalid/invalid.yaml") }}, { continueOnError: true, parse: { yaml: false, json: false }});
-        expect(result).toEqual({ foo: ":\n" });
+        expect(result).toEqual({ foo: "foo: [bar\n" });
       });
     });
   });
